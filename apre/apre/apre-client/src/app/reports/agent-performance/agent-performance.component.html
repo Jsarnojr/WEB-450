@@ -1,0 +1,24 @@
+<!-- agent-performance.component.html -->
+<table mat-table [dataSource]="dataSource">
+  <!-- Agent Column -->
+  <ng-container matColumnDef="agent">
+    <th mat-header-cell *matHeaderCellDef> Agent </th>
+    <td mat-cell *matCellDef="let element"> {{ element.agent }} </td>
+  </ng-container>
+
+  <!-- Month Column -->
+  <ng-container matColumnDef="month">
+    <th mat-header-cell *matHeaderCellDef> Month </th>
+    <td mat-cell *matCellDef="let element"> {{ element.month }} </td>
+  </ng-container>
+
+  <!-- Resolution Time Column -->
+  <ng-container matColumnDef="resolutionTime">
+    <th mat-header-cell *matHeaderCellDef> Resolution Time </th>
+    <td mat-cell *matCellDef="let element"> {{ element.resolutionTime }} </td>
+  </ng-container>
+
+  <!-- Header and Row Definitions -->
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
