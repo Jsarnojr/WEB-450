@@ -1,11 +1,14 @@
-// agent-performance.component.ts
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http'; // Ensure HttpClient is properly imported
+import { HttpClient } from '@angular/common/http';
+import { MatTableModule } from '@angular/material/table';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-agent-performance',
   templateUrl: './agent-performance.component.html',
   styleUrls: ['./agent-performance.component.css'],
+  standalone: true,
+  imports: [CommonModule, MatTableModule], // Import necessary modules for standalone component
 })
 export class AgentPerformanceComponent implements OnInit {
   agentPerformance: any[] = []; // Store the fetched performance data
