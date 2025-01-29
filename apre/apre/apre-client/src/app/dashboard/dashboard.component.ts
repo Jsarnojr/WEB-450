@@ -1,94 +1,43 @@
-/**
- * Author: Professor Krasso
- * Date: 8/8/2024
- * File: dashboard.component.ts
- * Description: dashboard component for the MEAN Stack Application
- */
-
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common'; // Added CommonModule import for *ngIf
 import { environment } from '../../environments/environment';
 import { ChartComponent } from '../shared/chart/chart.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [ChartComponent],
+  imports: [CommonModule, ChartComponent], // Included CommonModule to resolve *ngIf issue
   template: `
     <h2>Dashboard</h2>
     <div class="dashboard">
       <div class="charts-container">
         <div class="card">
-          <app-chart [type]="'bar'" [label]="'Sales Data'" [data]="salesData" [labels]="salesRegions"></app-chart>
+          <!-- Added spinner for Sales Data -->
+          <div *ngIf="loadingSalesData" class="spinner"></div>
+          <app-chart *ngIf="!loadingSalesData" [type]="'bar'" [label]="'Sales Data'" [data]="salesData" [labels]="salesRegions"></app-chart>
         </div>
         <div class="card">
-          <app-chart [type]="'line'" [label]="'Agent Performance'" [data]="agentPerformanceData" [labels]="agentNames"></app-chart>
+          <!-- Added spinner for Agent Performance Data -->
+          <div *ngIf="loadingAgentPerformanceData" class="spinner"></div>
+          <app-chart *ngIf="!loadingAgentPerformanceData" [type]="'line'" [label]="'Agent Performance'" [data]="agentPerformanceData" [labels]="agentNames"></app-chart>
         </div>
       </div>
       <div class="charts-container">
         <div class="card">
-          <app-chart [type]="'pie'" [label]="'Customer Feedback'" [data]="customerFeedbackData" [labels]="feedbackTypes"></app-chart>
+          <!-- Added spinner for Customer Feedback Data -->
+          <div *ngIf="loadingCustomerFeedbackData" class="spinner"></div>
+          <app-chart *ngIf="!loadingCustomerFeedbackData" [type]="'pie'" [label]="'Customer Feedback'" [data]="customerFeedbackData" [labels]="feedbackTypes"></app-chart>
         </div>
         <div class="card">
-          <app-chart [type]="'doughnut'" [label]="'Report Types'" [data]="reportCounts" [labels]="reportTypes"></app-chart>
+          <!-- Added spinner for Report Types Data -->
+          <div *ngIf="loadingReportTypesData" class="spinner"></div>
+          <app-chart *ngIf="!loadingReportTypesData" [type]="'doughnut'" [label]="'Report Types'" [data]="reportCounts" [labels]="reportTypes"></app-chart>
         </div>
-      </div>
-      <div class="dashboard__table-container">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Agent</th>
-              <th>Call Duration</th>
-              <th>Feedback</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (data of tableData; track data) {
-              <tr>
-                <td>{{ data.agent }}</td>
-                <td>{{ data.callDuration }}</td>
-                <td>{{ data.customerFeedback }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
       </div>
     </div>
   `,
   styles: `
-  .dashboard {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .charts-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .card {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: calc(50% - 10px);
-    height: 300px;
-    padding: 10px;
-    box-sizing: border-box;
-    flex-shrink: 0;
-  }
-
-  .card app-chart {
-    width: 100%;
-    height: 100%;
-  }
-
-  .dashboard__table-container {
-    width: 100%;
-  }
-
   .spinner {
     border: 4px solid rgba(0, 0, 0, 0.1);
     border-left-color: #000;
@@ -105,8 +54,11 @@ import { ChartComponent } from '../shared/chart/chart.component';
   `
 })
 export class DashboardComponent implements OnInit {
-  tableData: any[] = [];
+  // Added loading indicators for each report
   loadingSalesData = true;
+  loadingAgentPerformanceData = true;
+  loadingCustomerFeedbackData = true;
+  loadingReportTypesData = true;
 
   salesData: number[] = [];
   salesRegions: string[] = [];
@@ -117,8 +69,7 @@ export class DashboardComponent implements OnInit {
   reportCounts: number[] = [];
   reportTypes: string[] = [];
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
     this.loadReports();
@@ -129,7 +80,6 @@ export class DashboardComponent implements OnInit {
     this.loadAgentPerformanceData();
     this.loadCustomerFeedbackData();
     this.loadReportTypesData();
-    this.loadAgentFeedbackData();
   }
 
   loadSalesData() {
@@ -137,6 +87,7 @@ export class DashboardComponent implements OnInit {
       next: (data: any) => {
         this.salesData = data.map((d: any) => d.totalAmount);
         this.salesRegions = data.map((d: any) => d.region);
+        this.loadingSalesData = false; // Hides spinner when data is loaded
       }
     });
   }
@@ -146,6 +97,7 @@ export class DashboardComponent implements OnInit {
       next: (data: any) => {
         this.agentPerformanceData = data.map((d: any) => d.averagePerformance);
         this.agentNames = data.map((d: any) => d.name);
+        this.loadingAgentPerformanceData = false; // Hides spinner when data is loaded
       }
     });
   }
@@ -155,6 +107,7 @@ export class DashboardComponent implements OnInit {
       next: (data: any) => {
         this.feedbackTypes = data.map((d: any) => d.feedbackType);
         this.customerFeedbackData = data.map((d: any) => d.averagePerformance);
+        this.loadingCustomerFeedbackData = false; // Hides spinner when data is loaded
       }
     });
   }
@@ -162,18 +115,9 @@ export class DashboardComponent implements OnInit {
   loadReportTypesData() {
     this.http.get(`${environment.apiBaseUrl}/dashboard/report-types`).subscribe({
       next: (data: any) => {
-        console.log(data);
         this.reportTypes = data.reportTypes;
         this.reportCounts = data.reportCounts;
-      }
-    });
-  }
-
-  loadAgentFeedbackData() {
-    this.http.get(`${environment.apiBaseUrl}/dashboard/agent-feedback`).subscribe({
-      next: (data: any) => {
-        console.log(data);
-        this.tableData = data;
+        this.loadingReportTypesData = false; // Hides spinner when data is loaded
       }
     });
   }
